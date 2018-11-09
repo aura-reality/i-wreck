@@ -2,6 +2,10 @@
 
 Detect known 2D images in the user's environment, and use their positions to place AR content.
 
+## Setup
+
+Put the opencv framework at Frameworks/opencv2.framework
+
 ## Overview
 
 Many AR experiences can be enhanced by using known features of the user's environment to trigger the appearance of virtual content. For example, a museum app might show a virtual curator when the user points their device at a painting, or a board game might place virtual pieces when the player points their device at a game board. In iOS 11.3 and later, you can add such features to your AR experience by enabling image recognition in ARKit: Your app provides known 2D images, and ARKit tells you when and where those images are detected during an AR session.

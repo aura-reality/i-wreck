@@ -72,6 +72,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             fatalError("Missing expected asset catalog resources.")
         }
         
+        // Register the training images
+        for r in referenceImages {
+            TrainingImages.add(name: r.name!, image: UIImage.init(imageLiteralResourceName: r.name!))
+        }
+        
         let configuration = ARWorldTrackingConfiguration()
         configuration.detectionImages = referenceImages
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
