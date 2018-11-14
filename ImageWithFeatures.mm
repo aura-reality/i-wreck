@@ -8,34 +8,71 @@
 
 #import <opencv2/opencv.hpp>
 #import "ImageWithFeatures.h"
+#import "Match.h"
 #import <opencv2/core.hpp>
 #import <opencv2/features2d.hpp>
 #import <UIKit/UIKit.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 using namespace cv;
 
 @implementation ImageWithFeatures {
-    
     Mat descriptors;
     std::vector<KeyPoint> keypoints;
-    
+    NSString * name;
+    long cols;
+    long rows;
 }
 
 - (instancetype) init:(UIImage *) image {
     if ( self = [super init] ) {
         Mat gray = [self cvMatGrayFromUIImage:image];
+        self->cols = gray.cols;
+        self->rows = gray.rows;
         [self computeOrbFeatures:gray];
-        return nil;
+        return self;
         
     } else {
         return nil;
     }
 }
 
+- (instancetype) initFromCVPixelBuffer:(CVPixelBufferRef) pixelBuffer {
+    if ( self = [super init] ) {
+        CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+        Mat gray = [self cvMatGrayFromCVPixelBuffer:pixelBuffer];
+        self->cols = gray.cols;
+        self->rows = gray.rows;
+        [self computeOrbFeatures:gray];
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+        return self;
+        
+    } else {
+        return nil;
+    }
+}
+
+- (void) setName:(NSString *) name {
+    self->name = name;
+}
+
+- (NSString *) getName {
+    return name;
+}
+
 - (void) computeOrbFeatures:(Mat) image {
     int minHessian = 400;
     Ptr<ORB> detector = ORB::create(minHessian);
     detector->detectAndCompute(image, noArray(), keypoints, descriptors);
+}
+
+- (cv::Mat)cvMatGrayFromCVPixelBuffer:(CVPixelBufferRef) pixelBuffer
+{
+    int bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
+    int bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
+    int bytePerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
+    unsigned char *pixel = (unsigned char *) CVPixelBufferGetBaseAddress(pixelBuffer);
+    return cv::Mat(bufferHeight, bufferWidth, CV_8UC1, pixel, bytePerRow);
 }
 
 - (cv::Mat)cvMatGrayFromUIImage:(UIImage *)image
@@ -61,14 +98,14 @@ using namespace cv;
     return cvMat;
 }
 
-+ (std::vector<DMatch>) match:(Mat) descriptors1 descriptors2:(Mat) descriptors2  {
+- (std::vector<DMatch>) match:(Mat) descriptors1 {
     //Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(DescriptorMatcher::FLANNBASED);
 
     // Uses hamming distance for binary descriptors (i.e. orb)
     FlannBasedMatcher matcher(new flann::LshIndexParams(20, 10, 2));
     
     std::vector<std::vector<DMatch> > knn_matches;
-    matcher.knnMatch(descriptors1, descriptors2, knn_matches, 2);
+    matcher.knnMatch(descriptors1, self->descriptors, knn_matches, 2);
     
     //-- Filter matches using the Lowe's ratio test
     const float ratio_thresh = 0.7f;
@@ -82,19 +119,71 @@ using namespace cv;
     return good_matches;
 }
 
-//+ (void) homography:(std::vector<DMatch>) matches {
-//    //-- Localize the object
-//    std::vector<Point2f> obj;
-//    std::vector<Point2f> scene;
-//    
-//    for( int i = 0; i < matches.size(); i++ )
-//    {
-//        //-- Get the keypoints from the good matches
-//        obj.push_back( keypoints_object[matches[i].queryIdx ].pt );
-//        scene.push_back( keypoints_scene[matches[i].trainIdx ].pt );
-//    }
-//    
-//    Mat H = findHomography( obj, scene, CV_RANSAC );
-//}
+- (Match *) findBestMatch:(NSArray *) trainingImages {
+    
+    // Find the best match
+    ImageWithFeatures * bestImage;
+    std::vector<DMatch> bestMatches;
+    int maxMatches = -1;
+    for (int i = 0; i < trainingImages.count; i++) {
+        ImageWithFeatures *ti = (ImageWithFeatures *) trainingImages[i];
+        std::vector<DMatch> goodMatches = [self match:ti->descriptors];
+        if (goodMatches.size() > maxMatches) {
+            maxMatches = goodMatches.size();
+            bestMatches = goodMatches;
+            bestImage = ti;
+        }
+    }
+    
+    if (maxMatches > 10) {
+        NSArray * corners = [self homography:bestMatches image:bestImage];
+        return [[Match alloc] init:bestImage->name corners:corners];
+    } else {
+        return nil;
+    }
+}
+
+- (NSArray *) homography:(std::vector<DMatch>) matches image:(ImageWithFeatures *)matchImage {
+    
+    // Localize the object
+    std::vector<Point2f> obj;
+    std::vector<Point2f> scene;
+    
+    for (int i = 0; i < matches.size(); i++) {
+        
+        // Get the keypoints from the good matches
+        obj.push_back( matchImage->keypoints[matches[i].queryIdx ].pt );
+        scene.push_back( self->keypoints[matches[i].trainIdx ].pt );
+    }
+    
+    Mat H = findHomography( obj, scene, CV_RANSAC );
+    
+    // Get the corners from the object to be "detected"
+    std::vector<Point2f> obj_corners(4);
+    obj_corners[0] = cvPoint(0,0); obj_corners[1] = cvPoint(self->cols, 0);
+    obj_corners[2] = cvPoint(self->cols, self->rows); obj_corners[3] = cvPoint(0, self->rows);
+    std::vector<Point2f> scene_corners(4);
+    
+    perspectiveTransform(obj_corners, scene_corners, H);
+    
+    return @[
+              @[
+                  [NSNumber numberWithFloat:scene_corners[0].x],
+                  [NSNumber numberWithFloat:scene_corners[0].y]
+              ],
+              @[
+                  [NSNumber numberWithFloat:scene_corners[1].x],
+                  [NSNumber numberWithFloat:scene_corners[1].y]
+              ],
+              @[
+                  [NSNumber numberWithFloat:scene_corners[2].x],
+                  [NSNumber numberWithFloat:scene_corners[2].y]
+              ],
+              @[
+                  [NSNumber numberWithFloat:scene_corners[3].x],
+                  [NSNumber numberWithFloat:scene_corners[3].y]
+              ]
+          ];
+}
 
 @end

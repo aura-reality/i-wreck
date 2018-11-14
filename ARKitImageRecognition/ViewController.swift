@@ -73,9 +73,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         // Register the training images
+        print("Adding training images")
+        let t0 = NSDate.init().timeIntervalSince1970
         for r in referenceImages {
             TrainingImages.add(name: r.name!, image: UIImage.init(imageLiteralResourceName: r.name!))
         }
+        let t1 = NSDate.init().timeIntervalSince1970
+        print("Added \(referenceImages.count) training images in \(t1 - t0) seconds")
         
         let configuration = ARWorldTrackingConfiguration()
         configuration.detectionImages = referenceImages

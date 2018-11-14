@@ -7,6 +7,47 @@ Session status management for `ViewController`.
 
 import ARKit
 
+class ImageSaver {
+    
+    static let t0 = NSDate.init().timeIntervalSince1970
+    
+    static var haveSaved = true // set to false to save an image
+    
+    static func maybeSave(_ image: UIImage) {
+        if !haveSaved && (NSDate.init().timeIntervalSince1970 - t0) > 5 {
+            UIImageWriteToSavedPhotosAlbum(image,nil,nil,nil)
+            haveSaved = true
+            print("Saved image")
+        }
+    }
+}
+
+class HitTimer {
+    
+    static let INSTANCE = HitTimer.init()
+    
+    var t0: Double? = nil
+    
+    let printEvery: Double = 1
+    
+    var lastPrint: Double = 0
+    
+    var hits = 0.0
+    
+    func hit() {
+        let now = NSDate.init().timeIntervalSince1970
+        hits = hits + 1
+        
+        if t0 == nil {
+            t0 = now
+            
+        } else if (now - lastPrint > printEvery) {
+            print("\((hits-1.0)/(now-t0!)) frames per second")
+            lastPrint = now
+        }
+    }
+}
+
 extension ViewController: ARSessionDelegate {
     
     // MARK: - ARSessionDelegate
@@ -20,6 +61,21 @@ extension ViewController: ARSessionDelegate {
         case .normal:
             statusViewController.cancelScheduledMessage(for: .trackingStateEscalation)
         }
+    }
+    
+    func session(_ session: ARSession,
+                 didUpdate frame: ARFrame) {
+        
+        HitTimer.INSTANCE.hit()
+        
+        let buffer: CVPixelBuffer = frame.capturedImage
+        let imageWithFeatures = ImageWithFeatures.init(from: buffer)
+        let _ = TrainingImages.findBestMatch(image: imageWithFeatures)
+        
+//        let uiimage = UIImage(pixelBuffer: buffer, context: CIContext())!
+//        let imageWithFeatures = ImageWithFeatures(uiimage)
+//        ImageSaver.maybeSave(uiimage)
+        // CVPixelBuffer.
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {

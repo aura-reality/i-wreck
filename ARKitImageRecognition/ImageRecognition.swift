@@ -11,9 +11,15 @@ import UIKit
 
 class TrainingImages {
     
-    static var IMAGES: [String : ImageWithFeatures] = [:]
+    static var IMAGES = [ImageWithFeatures]()
     
     static func add(name: String, image: UIImage) {
-        IMAGES[name] = ImageWithFeatures(image)
+        let g = ImageWithFeatures(image)
+        g.setName(name)
+        IMAGES.append(g)
+    }
+    
+    static func findBestMatch(image: ImageWithFeatures) -> Match? {
+        return image.findBestMatch(IMAGES)
     }
 }

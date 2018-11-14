@@ -14,7 +14,8 @@
 		39D8DC1B1E8ADAE600386B05 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39D8DC1A1E8ADAE600386B05 /* LaunchScreen.storyboard */; };
 		450EA1FB2188F61900647D47 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 450EA1FA2188F61900647D47 /* opencv2.framework */; };
 		450EA1FF2188F7B300647D47 /* ImageWithFeatures.mm in Sources */ = {isa = PBXBuildFile; fileRef = 450EA1FE2188F7B300647D47 /* ImageWithFeatures.mm */; };
-		450EA20321923B1C00647D47 /* train.json in Resources */ = {isa = PBXBuildFile; fileRef = 450EA20221923B1C00647D47 /* train.json */; };
+		4579CFE3219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4579CFE2219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift */; };
+		4579CFE6219B8F7400D2C494 /* Match.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4579CFE5219B8F7400D2C494 /* Match.mm */; };
 		45C3E91F21923E0E009DD49A /* ImageRecognition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C3E91E21923E0E009DD49A /* ImageRecognition.swift */; };
 		C41366B91EB80DD400EC054A /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41366B81EB80DD400EC054A /* StatusViewController.swift */; };
 		C8C12A711F29277B00B011FE /* ViewController+ARSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8C12A701F29277B00B011FE /* ViewController+ARSessionDelegate.swift */; };
@@ -34,7 +35,9 @@
 		450EA1FD2188F7B300647D47 /* ImageWithFeatures.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageWithFeatures.h; sourceTree = "<group>"; };
 		450EA1FE2188F7B300647D47 /* ImageWithFeatures.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ImageWithFeatures.mm; sourceTree = "<group>"; };
 		450EA2002188F89400647D47 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
-		450EA20221923B1C00647D47 /* train.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = train.json; sourceTree = "<group>"; };
+		4579CFE2219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+CVPixelBuffer.swift"; sourceTree = "<group>"; };
+		4579CFE4219B8F6900D2C494 /* Match.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Match.h; sourceTree = "<group>"; };
+		4579CFE5219B8F7400D2C494 /* Match.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Match.mm; sourceTree = "<group>"; };
 		45C3E91E21923E0E009DD49A /* ImageRecognition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRecognition.swift; sourceTree = "<group>"; };
 		C14378D0C14383A000000001 /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		C16CC420C16CC45000000001 /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
@@ -69,7 +72,6 @@
 				3929C4971E89EC2C00E00B60 /* Info.plist */,
 				3929C48F1E89EC2C00E00B60 /* Main.storyboard */,
 				39D8DC1A1E8ADAE600386B05 /* LaunchScreen.storyboard */,
-				450EA20221923B1C00647D47 /* train.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -107,6 +109,9 @@
 				1488324B1EFC3EBF0043E0AB /* Additional View Controllers */,
 				1488324C1EFC3ED00043E0AB /* Resources */,
 				45C3E91E21923E0E009DD49A /* ImageRecognition.swift */,
+				4579CFE2219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift */,
+				4579CFE4219B8F6900D2C494 /* Match.h */,
+				4579CFE5219B8F7400D2C494 /* Match.mm */,
 			);
 			path = ARKitImageRecognition;
 			sourceTree = "<group>";
@@ -199,7 +204,6 @@
 				39D8DC1B1E8ADAE600386B05 /* LaunchScreen.storyboard in Resources */,
 				3929C4931E89EC2C00E00B60 /* Assets.xcassets in Resources */,
 				3929C4911E89EC2C00E00B60 /* Main.storyboard in Resources */,
-				450EA20321923B1C00647D47 /* train.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,8 +218,10 @@
 				450EA1FF2188F7B300647D47 /* ImageWithFeatures.mm in Sources */,
 				C41366B91EB80DD400EC054A /* StatusViewController.swift in Sources */,
 				45C3E91F21923E0E009DD49A /* ImageRecognition.swift in Sources */,
+				4579CFE3219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift in Sources */,
 				C8C12A711F29277B00B011FE /* ViewController+ARSessionDelegate.swift in Sources */,
 				3929C48C1E89EC2C00E00B60 /* AppDelegate.swift in Sources */,
+				4579CFE6219B8F7400D2C494 /* Match.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

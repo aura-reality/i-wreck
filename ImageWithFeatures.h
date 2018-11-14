@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Match.h"
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -14,9 +15,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ImageWithFeatures : NSObject
 
-+ (NSString *)openCVVersionString;
-
 - (instancetype) init:(UIImage *) image;
+
+- (instancetype) initFromCVPixelBuffer:(CVPixelBufferRef) pixelBuffer;
+
+- (Match *) findBestMatch:(NSArray *) trainingImages;
+
+- (void) setName:(NSString *) name;
+
+- (NSString *) getName;
 
 @end
 
