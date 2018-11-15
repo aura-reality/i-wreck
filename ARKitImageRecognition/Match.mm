@@ -18,30 +18,31 @@
 
 using namespace cv;
 
-@implementation Match {
-    
-    NSString * matchedImageName;
-    NSArray * corners;
-}
-
-- (instancetype) init:(NSString *) matchedImageName corners:(NSArray *)corners {
-    if ( self = [super init] ) {
-        self->matchedImageName = matchedImageName;
-        self->corners = corners;
-        return self;
-        
-    } else {
-        return nil;
-    }
-}
-
-- (NSString *) getMatchedImageName {
-    return matchedImageName;
-}
-
-- (NSArray *) getCorners {
-    return corners;
-}
+@implementation Match
+//{
+//    
+//    NSString * matchedImageName;
+//    NSArray * corners;
+//}
+//
+//- (instancetype) init:(NSString *) matchedImageName corners:(NSArray *)corners {
+//    if ( self = [super init] ) {
+//        self->matchedImageName = matchedImageName;
+//        self->corners = corners;
+//        return self;
+//        
+//    } else {
+//        return nil;
+//    }
+//}
+//
+//- (NSString *) getMatchedImageName {
+//    return matchedImageName;
+//}
+//
+//- (NSArray *) getCorners {
+//    return corners;
+//}
 
 
 

@@ -137,7 +137,11 @@ using namespace cv;
     
     if (maxMatches > 10) {
         NSArray * corners = [self homography:bestMatches image:bestImage];
-        return [[Match alloc] init:bestImage->name corners:corners];
+        Match * match = [[Match alloc] init];
+        match.corners = corners;
+        match.numGoodMatches = maxMatches;
+        match.matchedImageName = bestImage->name;
+        return match; // [[Match alloc] init:bestImage->name corners:corners];
     } else {
         return nil;
     }

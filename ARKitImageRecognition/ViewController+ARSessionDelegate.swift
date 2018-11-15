@@ -22,28 +22,49 @@ class ImageSaver {
     }
 }
 
-class HitTimer {
+class FPSCounter {
     
-    static let INSTANCE = HitTimer.init()
+    static let INSTANCE = FPSCounter.init()
     
     var t0: Double? = nil
     
-    let printEvery: Double = 1
-    
     var lastPrint: Double = 0
     
-    var hits = 0.0
+    var frameCount = 0.0
     
-    func hit() {
+    func frame() {
         let now = NSDate.init().timeIntervalSince1970
-        hits = hits + 1
+        frameCount = frameCount + 1
         
         if t0 == nil {
             t0 = now
             
-        } else if (now - lastPrint > printEvery) {
-            print("\((hits-1.0)/(now-t0!)) frames per second")
+        } else if (now - lastPrint > 1) {
+            print("\((frameCount-1.0)/(now-t0!)) frames per second")
             lastPrint = now
+        }
+    }
+}
+
+class RateLimiter {
+    
+    static let INSTANCE = RateLimiter.init(waitTime: 0.1)
+    
+    let waitTime: Double // in seconds
+    
+    var prev: Double = 0
+    
+    init(waitTime: Double) {
+        self.waitTime = waitTime
+    }
+    
+    func mustWait() -> Bool {
+        let now = NSDate.init().timeIntervalSince1970
+        if (now - prev > waitTime) {
+            prev = now
+            return true
+        } else {
+            return false
         }
     }
 }
@@ -66,11 +87,15 @@ extension ViewController: ARSessionDelegate {
     func session(_ session: ARSession,
                  didUpdate frame: ARFrame) {
         
-        HitTimer.INSTANCE.hit()
+        FPSCounter.INSTANCE.frame()
         
-        let buffer: CVPixelBuffer = frame.capturedImage
-        let imageWithFeatures = ImageWithFeatures.init(from: buffer)
-        let _ = TrainingImages.findBestMatch(image: imageWithFeatures)
+        if !RateLimiter.INSTANCE.mustWait() {
+            let buffer: CVPixelBuffer = frame.capturedImage
+            let imageWithFeatures = ImageWithFeatures.init(from: buffer)
+            if let match = TrainingImages.findBestMatch(image: imageWithFeatures) {
+                showImageName(match.matchedImageName)
+            }
+        }
         
 //        let uiimage = UIImage(pixelBuffer: buffer, context: CIContext())!
 //        let imageWithFeatures = ImageWithFeatures(uiimage)

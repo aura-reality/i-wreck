@@ -15,6 +15,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     @IBOutlet weak var blurView: UIVisualEffectView!
     
+    static let USE_OPENCV = true
+    
     /// The view controller that displays the status and "restart experience" UI.
     lazy var statusViewController: StatusViewController = {
         return childViewControllers.lazy.compactMap({ $0 as? StatusViewController }).first!
@@ -73,16 +75,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         // Register the training images
-        print("Adding training images")
-        let t0 = NSDate.init().timeIntervalSince1970
-        for r in referenceImages {
-            TrainingImages.add(name: r.name!, image: UIImage.init(imageLiteralResourceName: r.name!))
+        if ViewController.USE_OPENCV {
+            print("Adding training images")
+            let t0 = NSDate.init().timeIntervalSince1970
+            for r in referenceImages {
+                TrainingImages.add(name: r.name!, image: UIImage.init(imageLiteralResourceName: r.name!))
+            }
+            let t1 = NSDate.init().timeIntervalSince1970
+            print("Added \(referenceImages.count) training images in \(t1 - t0) seconds")
         }
-        let t1 = NSDate.init().timeIntervalSince1970
-        print("Added \(referenceImages.count) training images in \(t1 - t0) seconds")
         
         let configuration = ARWorldTrackingConfiguration()
-        configuration.detectionImages = referenceImages
+        if !ViewController.USE_OPENCV {
+                    configuration.detectionImages = referenceImages
+        }
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
 
         statusViewController.scheduleMessage("Look around to detect images", inSeconds: 7.5, messageType: .contentPlacement)
@@ -118,8 +124,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             node.addChildNode(planeNode)
         }
 
+        showImageName(referenceImage.name ?? "")
+    }
+    
+    func showImageName(_ imageName: String) {
         DispatchQueue.main.async {
-            let imageName = referenceImage.name ?? ""
             self.statusViewController.cancelAllScheduledMessages()
             self.statusViewController.showMessage("Detected image “\(imageName)”")
         }

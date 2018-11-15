@@ -13,11 +13,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Match : NSObject
 
-- (instancetype) init:(NSString *) matchedImageName corners:(NSArray *)corners;
+//- (instancetype) init:(NSString *) matchedImageName corners:(NSArray *)corners;
 
-- (NSString *) getMatchedImageName;
+@property (nonatomic) NSString * matchedImageName;
 
-- (NSArray *) getCorners;
+@property (nonatomic) NSArray * corners;
+
+@property (nonatomic) int numGoodMatches;
+
+@property (nonatomic) int inlierRatio;
+
+//- (NSString *) getMatchedImageName;
+//
+//- (NSArray *) getCorners;
+//
+//- int getNumGoodMatches;
+//
+//- float getInlierRatio;
 
 @end
 
