@@ -14,7 +14,8 @@ class TrainingImages {
     static var IMAGES = [ImageWithFeatures]()
     
     static func add(name: String, image: UIImage) {
-        let g = ImageWithFeatures(image)
+        print("Adding image \(name) with size \(image.size)")
+        let g = ImageWithFeatures.init(from: image)
         g.setName(name)
         IMAGES.append(g)
     }

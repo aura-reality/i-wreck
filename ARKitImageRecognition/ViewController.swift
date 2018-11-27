@@ -38,6 +38,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         sceneView.delegate = self
         sceneView.session.delegate = self
+        
+        print("\(ImageWithFeatures.openCVVersionString())")
 
         // Hook up status view controller callback(s).
         statusViewController.restartExperienceHandler = { [unowned self] in
@@ -128,6 +130,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func showImageName(_ imageName: String) {
+        print("Detected image: \(imageName)")
         DispatchQueue.main.async {
             self.statusViewController.cancelAllScheduledMessages()
             self.statusViewController.showMessage("Detected image “\(imageName)”")

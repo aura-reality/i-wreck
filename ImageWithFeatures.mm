@@ -10,6 +10,7 @@
 #import "ImageWithFeatures.h"
 #import "Match.h"
 #import <opencv2/core.hpp>
+#import <opencv2/core/types_c.h>
 #import <opencv2/features2d.hpp>
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -24,9 +25,61 @@ using namespace cv;
     long rows;
 }
 
-- (instancetype) init:(UIImage *) image {
-    if ( self = [super init] ) {
-        Mat gray = [self cvMatGrayFromUIImage:image];
++ (NSString *)openCVVersionString {
+    return [NSString stringWithFormat:@"OpenCV Version %s",  CV_VERSION];
+}
+
++ (UIImage *) toCvMatToUIImage:(UIImage *) image {
+    Mat mat = [self cvMatGrayFromUIImage:image];
+    return [ImageWithFeatures UIImageFromCVMat_opencvdocs:mat];
+    
+}
+
++ (UIImage *) toCVMatToUIImage:(CVPixelBufferRef) pixelBuffer {
+    Mat mat = [self cvMatGrayFromYUVCVPixelBuffer:pixelBuffer];
+    return [ImageWithFeatures UIImageFromCVMat_opencvdocs:mat];
+}
+
++ (UIImage *) UIImageFromCVMat_opencvdocs:(cv::Mat)cvMat
+{
+    NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
+    CGColorSpaceRef colorSpace;
+    
+    if (cvMat.elemSize() == 1) {
+        colorSpace = CGColorSpaceCreateDeviceGray();
+    } else {
+        colorSpace = CGColorSpaceCreateDeviceRGB();
+    }
+    
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    
+    // Creating CGImage from cv::Mat
+    CGImageRef imageRef = CGImageCreate(cvMat.cols,                                 //width
+                                        cvMat.rows,                                 //height
+                                        8,                                          //bits per component
+                                        8 * cvMat.elemSize(),                       //bits per pixel
+                                        cvMat.step[0],                            //bytesPerRow
+                                        colorSpace,                                 //colorspace
+                                        kCGImageAlphaNone|kCGBitmapByteOrderDefault,// bitmap info
+                                        provider,                                   //CGDataProviderRef
+                                        NULL,                                       //decode
+                                        false,                                      //should interpolate
+                                        kCGRenderingIntentDefault                   //intent
+                                        );
+    
+    
+    // Getting UIImage from CGImage
+    UIImage *finalImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
+    
+    return finalImage;
+}
+
+- (instancetype) initFromUIImage:(UIImage *) image {
+    if (self = [super init]) {
+        Mat gray = [ImageWithFeatures cvMatGrayFromUIImage:image];
         self->cols = gray.cols;
         self->rows = gray.rows;
         [self computeOrbFeatures:gray];
@@ -37,10 +90,10 @@ using namespace cv;
     }
 }
 
-- (instancetype) initFromCVPixelBuffer:(CVPixelBufferRef) pixelBuffer {
+- (instancetype) initFromYUVCVPixelBuffer:(CVPixelBufferRef) pixelBuffer {
     if ( self = [super init] ) {
         CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-        Mat gray = [self cvMatGrayFromCVPixelBuffer:pixelBuffer];
+        Mat gray = [ImageWithFeatures cvMatGrayFromYUVCVPixelBuffer:pixelBuffer];
         self->cols = gray.cols;
         self->rows = gray.rows;
         [self computeOrbFeatures:gray];
@@ -64,18 +117,21 @@ using namespace cv;
     int minHessian = 400;
     Ptr<ORB> detector = ORB::create(minHessian);
     detector->detectAndCompute(image, noArray(), keypoints, descriptors);
+    if (*descriptors.size.p == 0) {
+        printf("Warning: image has 0 descriptors\n");
+    }
 }
 
-- (cv::Mat)cvMatGrayFromCVPixelBuffer:(CVPixelBufferRef) pixelBuffer
++ (cv::Mat)cvMatGrayFromYUVCVPixelBuffer:(CVPixelBufferRef) pixelBuffer
 {
-    int bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
-    int bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
-    int bytePerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
-    unsigned char *pixel = (unsigned char *) CVPixelBufferGetBaseAddress(pixelBuffer);
+    int bufferWidth = CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
+    int bufferHeight = CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    int bytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    unsigned char *pixel = (unsigned char *) CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
     return cv::Mat(bufferHeight, bufferWidth, CV_8UC1, pixel, bytePerRow);
 }
 
-- (cv::Mat)cvMatGrayFromUIImage:(UIImage *)image
++ (cv::Mat)cvMatGrayFromUIImage:(UIImage *)image
 {
     CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
     CGFloat cols = image.size.width;
@@ -89,7 +145,7 @@ using namespace cv;
                                                     8,                          // Bits per component
                                                     cvMat.step[0],              // Bytes per row
                                                     colorSpace,                 // Colorspace
-                                                    kCGImageAlphaNoneSkipLast |
+                                                    kCGImageAlphaNone |
                                                     kCGBitmapByteOrderDefault); // Bitmap info flags
     
     CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
@@ -99,17 +155,24 @@ using namespace cv;
 }
 
 - (std::vector<DMatch>) match:(Mat) descriptors1 {
+    std::vector<DMatch> good_matches;
+    
+    if (*descriptors.size.p == 0) {
+        return good_matches;
+    }
+    
     //Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(DescriptorMatcher::FLANNBASED);
-
-    // Uses hamming distance for binary descriptors (i.e. orb)
-    FlannBasedMatcher matcher(new flann::LshIndexParams(20, 10, 2));
+    
+    // Uses hamming distance for binary descriptors (i.e. orb) -- LSH imples Hamming
+    flann::LshIndexParams * indexParams = new flann::LshIndexParams(20, 10, 2);
+    FlannBasedMatcher matcher(indexParams);
     
     std::vector<std::vector<DMatch> > knn_matches;
     matcher.knnMatch(descriptors1, self->descriptors, knn_matches, 2);
     
     //-- Filter matches using the Lowe's ratio test
     const float ratio_thresh = 0.7f;
-    std::vector<DMatch> good_matches;
+
     for (size_t i = 0; i < knn_matches.size(); i++) {
         if (knn_matches[i][0].distance < ratio_thresh * knn_matches[i][1].distance) {
             good_matches.push_back(knn_matches[i][0]);
@@ -124,24 +187,31 @@ using namespace cv;
     // Find the best match
     ImageWithFeatures * bestImage;
     std::vector<DMatch> bestMatches;
-    int maxMatches = -1;
+    long maxMatches = -1;
     for (int i = 0; i < trainingImages.count; i++) {
         ImageWithFeatures *ti = (ImageWithFeatures *) trainingImages[i];
         std::vector<DMatch> goodMatches = [self match:ti->descriptors];
-        if (goodMatches.size() > maxMatches) {
-            maxMatches = goodMatches.size();
+        long s = goodMatches.size();
+        if (s > maxMatches) {
+            maxMatches = s;
             bestMatches = goodMatches;
             bestImage = ti;
         }
+        
+        // printf("%ld feature matches\t%s\n", s, [ti->name  UTF8String]);
     }
     
     if (maxMatches > 10) {
         NSArray * corners = [self homography:bestMatches image:bestImage];
+        if (corners == nil) {
+            return nil;
+        }
         Match * match = [[Match alloc] init];
+        printf("Found homography for %s\n", [bestImage->name UTF8String]);
         match.corners = corners;
         match.numGoodMatches = maxMatches;
         match.matchedImageName = bestImage->name;
-        return match; // [[Match alloc] init:bestImage->name corners:corners];
+        return match;
     } else {
         return nil;
     }
@@ -160,34 +230,40 @@ using namespace cv;
         scene.push_back( self->keypoints[matches[i].trainIdx ].pt );
     }
     
-    Mat H = findHomography( obj, scene, CV_RANSAC );
+    Mat H = findHomography( obj, scene, FM_RANSAC );
     
-    // Get the corners from the object to be "detected"
-    std::vector<Point2f> obj_corners(4);
-    obj_corners[0] = cvPoint(0,0); obj_corners[1] = cvPoint(self->cols, 0);
-    obj_corners[2] = cvPoint(self->cols, self->rows); obj_corners[3] = cvPoint(0, self->rows);
-    std::vector<Point2f> scene_corners(4);
-    
-    perspectiveTransform(obj_corners, scene_corners, H);
-    
-    return @[
-              @[
-                  [NSNumber numberWithFloat:scene_corners[0].x],
-                  [NSNumber numberWithFloat:scene_corners[0].y]
-              ],
-              @[
-                  [NSNumber numberWithFloat:scene_corners[1].x],
-                  [NSNumber numberWithFloat:scene_corners[1].y]
-              ],
-              @[
-                  [NSNumber numberWithFloat:scene_corners[2].x],
-                  [NSNumber numberWithFloat:scene_corners[2].y]
-              ],
-              @[
-                  [NSNumber numberWithFloat:scene_corners[3].x],
-                  [NSNumber numberWithFloat:scene_corners[3].y]
-              ]
-          ];
+    if (H.empty()) {
+        printf("Attempted but did not find homography\n");
+        return nil;
+        
+    } else {
+        
+        // Get the corners from the object to be "detected"
+        std::vector<Point2f> obj_corners(4);
+        obj_corners[0] = cvPoint(0,0); obj_corners[1] = cvPoint(self->cols, 0);
+        obj_corners[2] = cvPoint(self->cols, self->rows); obj_corners[3] = cvPoint(0, self->rows);
+        std::vector<Point2f> scene_corners(4);
+        
+        perspectiveTransform(obj_corners, scene_corners, H);
+        return @[
+                  @[
+                      [NSNumber numberWithFloat:scene_corners[0].x],
+                      [NSNumber numberWithFloat:scene_corners[0].y]
+                  ],
+                  @[
+                      [NSNumber numberWithFloat:scene_corners[1].x],
+                      [NSNumber numberWithFloat:scene_corners[1].y]
+                  ],
+                  @[
+                      [NSNumber numberWithFloat:scene_corners[2].x],
+                      [NSNumber numberWithFloat:scene_corners[2].y]
+                  ],
+                  @[
+                      [NSNumber numberWithFloat:scene_corners[3].x],
+                      [NSNumber numberWithFloat:scene_corners[3].y]
+                  ]
+              ];
+    }
 }
 
 @end

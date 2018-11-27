@@ -5,40 +5,25 @@
   },
   "resources" : [
     {
-      "filename" : "iMac 21.5-inch.arimageset"
+      "filename" : "A-with-boundary.arreferenceimage"
     },
     {
-      "filename" : "iMac 27-inch.arimageset"
+      "filename" : "A-without-boundary.arreferenceimage"
     },
     {
-      "filename" : "iPad 9.7-inch.arimageset"
+      "filename" : "C-with-boundary.arreferenceimage"
     },
     {
-      "filename" : "iPad Pro 10.5-inch.arimageset"
+      "filename" : "C-without-boundary.arreferenceimage"
     },
     {
-      "filename" : "iPad Pro 12.9-inch.arimageset"
+      "filename" : "keyboard-savage.arreferenceimage"
     },
     {
-      "filename" : "iPhone 4-inch.arimageset"
+      "filename" : "T-with-boundary.arreferenceimage"
     },
     {
-      "filename" : "iPhone 4.7-inch.arimageset"
-    },
-    {
-      "filename" : "iPhone 5.5-inch.arimageset"
-    },
-    {
-      "filename" : "iPhone X.arimageset"
-    },
-    {
-      "filename" : "MacBook 12-inch.arimageset"
-    },
-    {
-      "filename" : "MacBook Pro 13-inch.arimageset"
-    },
-    {
-      "filename" : "MacBook Pro 15-inch.arimageset"
+      "filename" : "T-without-boundary.arreferenceimage"
     }
   ]
 }
