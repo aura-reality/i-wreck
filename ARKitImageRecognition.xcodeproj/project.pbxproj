@@ -17,6 +17,8 @@
 		4579CFE3219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4579CFE2219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift */; };
 		4579CFE6219B8F7400D2C494 /* Match.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4579CFE5219B8F7400D2C494 /* Match.mm */; };
 		45C3E91F21923E0E009DD49A /* ImageRecognition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C3E91E21923E0E009DD49A /* ImageRecognition.swift */; };
+		45F47FF921B1E44300E3C28D /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45F47FF821B1E44300E3C28D /* Debug.swift */; };
+		45F47FFB21B1E60600E3C28D /* Injections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45F47FFA21B1E60600E3C28D /* Injections.swift */; };
 		C41366B91EB80DD400EC054A /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41366B81EB80DD400EC054A /* StatusViewController.swift */; };
 		C8C12A711F29277B00B011FE /* ViewController+ARSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8C12A701F29277B00B011FE /* ViewController+ARSessionDelegate.swift */; };
 /* End PBXBuildFile section */
@@ -39,6 +41,8 @@
 		4579CFE4219B8F6900D2C494 /* Match.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Match.h; sourceTree = "<group>"; };
 		4579CFE5219B8F7400D2C494 /* Match.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Match.mm; sourceTree = "<group>"; };
 		45C3E91E21923E0E009DD49A /* ImageRecognition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRecognition.swift; sourceTree = "<group>"; };
+		45F47FF821B1E44300E3C28D /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
+		45F47FFA21B1E60600E3C28D /* Injections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Injections.swift; sourceTree = "<group>"; };
 		C14378D0C14383A000000001 /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		C16CC420C16CC45000000001 /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		C41366B81EB80DD400EC054A /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
@@ -106,9 +110,11 @@
 				3929C48B1E89EC2C00E00B60 /* AppDelegate.swift */,
 				3929C48D1E89EC2C00E00B60 /* ViewController.swift */,
 				C8C12A701F29277B00B011FE /* ViewController+ARSessionDelegate.swift */,
+				45F47FF821B1E44300E3C28D /* Debug.swift */,
 				1488324B1EFC3EBF0043E0AB /* Additional View Controllers */,
 				1488324C1EFC3ED00043E0AB /* Resources */,
 				45C3E91E21923E0E009DD49A /* ImageRecognition.swift */,
+				45F47FFA21B1E60600E3C28D /* Injections.swift */,
 				4579CFE2219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift */,
 				4579CFE4219B8F6900D2C494 /* Match.h */,
 				4579CFE5219B8F7400D2C494 /* Match.mm */,
@@ -219,8 +225,10 @@
 				C41366B91EB80DD400EC054A /* StatusViewController.swift in Sources */,
 				45C3E91F21923E0E009DD49A /* ImageRecognition.swift in Sources */,
 				4579CFE3219B4D5500D2C494 /* UIImage+CVPixelBuffer.swift in Sources */,
+				45F47FFB21B1E60600E3C28D /* Injections.swift in Sources */,
 				C8C12A711F29277B00B011FE /* ViewController+ARSessionDelegate.swift in Sources */,
 				3929C48C1E89EC2C00E00B60 /* AppDelegate.swift in Sources */,
+				45F47FF921B1E44300E3C28D /* Debug.swift in Sources */,
 				4579CFE6219B8F7400D2C494 /* Match.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

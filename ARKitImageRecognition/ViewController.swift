@@ -67,7 +67,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     /// Prevents restarting the session while a restart is in progress.
     var isRestartAvailable = true
-
+    
     /// Creates a new AR configuration to run on the `session`.
     /// - Tag: ARReferenceImage-Loading
 	func resetTracking() {
@@ -76,21 +76,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             fatalError("Missing expected asset catalog resources.")
         }
         
-        // Register the training images
+        let configuration = ARWorldTrackingConfiguration()
+        
         if ViewController.USE_OPENCV {
-            print("Adding training images")
-            let t0 = NSDate.init().timeIntervalSince1970
-            for r in referenceImages {
-                TrainingImages.add(name: r.name!, image: UIImage.init(imageLiteralResourceName: r.name!))
-            }
-            let t1 = NSDate.init().timeIntervalSince1970
-            print("Added \(referenceImages.count) training images in \(t1 - t0) seconds")
+            Injections.initializeOpenCVTracking(referenceImages)
+            
+        } else {
+            configuration.detectionImages = referenceImages
         }
         
-        let configuration = ARWorldTrackingConfiguration()
-        if !ViewController.USE_OPENCV {
-                    configuration.detectionImages = referenceImages
-        }
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
 
         statusViewController.scheduleMessage("Look around to detect images", inSeconds: 7.5, messageType: .contentPlacement)
@@ -130,7 +124,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func showImageName(_ imageName: String) {
-        print("Detected image: \(imageName)")
         DispatchQueue.main.async {
             self.statusViewController.cancelAllScheduledMessages()
             self.statusViewController.showMessage("Detected image “\(imageName)”")
