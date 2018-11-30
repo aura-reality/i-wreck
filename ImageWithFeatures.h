@@ -15,15 +15,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ImageWithFeatures : NSObject
 
-- (instancetype) init:(UIImage *) image;
++ (NSString *)openCVVersionString;
 
-- (instancetype) initFromCVPixelBuffer:(CVPixelBufferRef) pixelBuffer;
+- (instancetype) initFromUIImage:(UIImage *) image;
+
+- (instancetype) initFromYUVCVPixelBuffer:(CVPixelBufferRef) pixelBuffer;
 
 - (Match *) findBestMatch:(NSArray *) trainingImages;
 
 - (void) setName:(NSString *) name;
 
 - (NSString *) getName;
+
++ (UIImage *) toCvMatToUIImage:(UIImage *) image;
+
++ (UIImage *) toCVMatToUIImage:(CVPixelBufferRef) pixelBuffer;
 
 @end
 

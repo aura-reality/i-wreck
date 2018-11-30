@@ -9,13 +9,19 @@ import ARKit
 
 class ImageSaver {
     
-    static let t0 = NSDate.init().timeIntervalSince1970
+    static var t0 = NSDate.init().timeIntervalSince1970
     
     static var haveSaved = true // set to false to save an image
     
+    static func save(_ image: UIImage) {
+        UIImageWriteToSavedPhotosAlbum(image,nil,nil,nil)
+    }
+    
     static func maybeSave(_ image: UIImage) {
-        if !haveSaved && (NSDate.init().timeIntervalSince1970 - t0) > 5 {
-            UIImageWriteToSavedPhotosAlbum(image,nil,nil,nil)
+        let now = NSDate.init().timeIntervalSince1970
+        if now - t0 > 3 {
+            t0 = now
+            save(image)
             haveSaved = true
             print("Saved image")
         }
@@ -48,7 +54,7 @@ class FPSCounter {
 
 class RateLimiter {
     
-    static let INSTANCE = RateLimiter.init(waitTime: 0.1)
+    static let INSTANCE = RateLimiter.init(waitTime: 0.33)
     
     let waitTime: Double // in seconds
     
@@ -62,9 +68,9 @@ class RateLimiter {
         let now = NSDate.init().timeIntervalSince1970
         if (now - prev > waitTime) {
             prev = now
-            return true
-        } else {
             return false
+        } else {
+            return true
         }
     }
 }
@@ -91,7 +97,7 @@ extension ViewController: ARSessionDelegate {
         
         if !RateLimiter.INSTANCE.mustWait() {
             let buffer: CVPixelBuffer = frame.capturedImage
-            let imageWithFeatures = ImageWithFeatures.init(from: buffer)
+            let imageWithFeatures = ImageWithFeatures.init(fromYUVCVPixelBuffer: buffer)
             if let match = TrainingImages.findBestMatch(image: imageWithFeatures) {
                 showImageName(match.matchedImageName)
             }
